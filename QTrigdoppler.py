@@ -6,6 +6,7 @@
 #   v0.4 and beyond: Extended, partly rewritten and adapted from hamlib to direct radio control by DL3JOP Joshua Petry
 
 ### Mandatory imports
+from skyfield.api import load, EarthSatellite, Topos, wgs84, Distance
 import ephem
 import socket
 import sys
@@ -70,62 +71,100 @@ elif configur.get('misc', 'display_map') == "False":
 ### Global constants
 C = 299792458.
 subtone_list = ["None", "67 Hz", "71.9 Hz", "74.4 Hz", "141.3 Hz"]
+ts = load.timescale()
 if DISPLAY_MAP:
     GEOD = Geod(ellps="WGS84")
 
 
 ### Helper functions
 ## Calculates the tx doppler frequency
-def tx_dopplercalc(ephemdata, freq_at_sat):
-    ephemdata.compute(myloc)
-    doppler = int(freq_at_sat + ephemdata.range_velocity * freq_at_sat / C)
-    return doppler
+def tx_dopplercalc(satellite, freq_at_sat):
+    t = ts.now()
+    sat_at_time = satellite.at(t)
+    observer_position = observer.at(t)
+    relative_velocity = sat_at_time.velocity.m_per_s
+    doppler_shift = freq_at_sat + relative_velocity[0] * freq_at_sat / C  # Assuming radial velocity (x-component)
+    return int(doppler_shift)
 ## Calculates the rx doppler frequency
-def rx_dopplercalc(ephemdata, freq_at_sat):
-    ephemdata.compute(myloc)
-    doppler = int(freq_at_sat - ephemdata.range_velocity * freq_at_sat / C)
-    return doppler
+def rx_dopplercalc(satellite, freq_at_sat):
+    t = ts.now()
+    sat_at_time = satellite.at(t)
+    observer_position = observer.at(t)
+    relative_velocity = sat_at_time.velocity.m_per_s
+    doppler_shift = freq_at_sat - relative_velocity[0] * freq_at_sat / C  # Assuming radial velocity (x-component)
+    return int(doppler_shift)
 ## Calculates the tx doppler error   
-def tx_doppler_val_calc(ephemdata, freq_at_sat):
-    ephemdata.compute(myloc)
-    doppler = format(float(ephemdata.range_velocity * freq_at_sat / C), '.2f')
-    return doppler
+def tx_doppler_val_calc(satellite, freq_at_sat):
+    t = ts.now()
+    sat_at_time = satellite.at(t)
+    observer_position = observer.at(t)
+    relative_velocity = sat_at_time.velocity.m_per_s
+    doppler_shift = relative_velocity[0] * freq_at_sat / C  # Assuming radial velocity (x-component)
+    return int(doppler_shift)
 ## Calculates the rx doppler error   
-def rx_doppler_val_calc(ephemdata, freq_at_sat):
-    ephemdata.compute(myloc)
-    doppler = format(float(-ephemdata.range_velocity * freq_at_sat / C),'.2f')
-    return doppler
+def rx_doppler_val_calc(satellite, freq_at_sat):
+    t = ts.now()
+    sat_at_time = satellite.at(t)
+    observer_position = observer.at(t)
+    relative_velocity = sat_at_time.velocity.m_per_s
+    doppler_shift = -relative_velocity[0] * freq_at_sat / C  # Assuming radial velocity (x-component)
+    return int(doppler_shift)
 ## Calculates sat elevation at observer
-def sat_ele_calc(ephemdata):
-    ephemdata.compute(myloc)
-    ele = format(ephemdata.alt/ math.pi * 180.0,'.2f' )
-    return ele    
+def sat_ele_calc(satellite):
+    t = ts.now()  # Get current time
+    difference = satellite - observer
+    topocentric = difference.at(t)
+    alt, az, distance = topocentric.altaz()
+    ele = format(alt.degrees, '.2f')  # Altitude is already in degrees
+    return ele
 ## Calculates sat azimuth at observer
-def sat_azi_calc(ephemdata):
-    ephemdata.compute(myloc)
-    azi = format(ephemdata.az/ math.pi * 180.0,'.2f' )
-    return azi
+def sat_azi_calc(satellite):
+    t = ts.now()  # Get current time
+    difference = satellite - observer
+    topocentric = difference.at(t)
+    alt, az, distance = topocentric.altaz()
+    az = format(az.degrees, '.2f')  # Altitude is already in degrees
+    return az
 ## Calculates sat subpoint latitude
-def sat_lat_calc(ephemdata):
-    ephemdata.compute(myloc)
-    return format(ephemdata.sublat/ math.pi * 180.0,'.1f' )  
+def sat_lat_calc(satellite):
+    t = ts.now()
+    sat_at_time = satellite.at(t)
+    subpoint = sat_at_time.subpoint()
+    lat = subpoint.latitude.degrees
+    return format(lat, '.1f') 
 ## Calculates sat subpoint longitude
-def sat_lon_calc(ephemdata):
-    ephemdata.compute(myloc)
-    return format(ephemdata.sublong/ math.pi * 180.0,'.1f' )
+def sat_lon_calc(satellite):
+    t = ts.now()
+    sat_at_time = satellite.at(t)
+    subpoint = sat_at_time.subpoint()
+    long = subpoint.longitude.degrees
+    return format(long, '.1f') 
 ## Calculates sat height at observer
-def sat_height_calc(ephemdata):
-    ephemdata.compute(myloc)
-    height = format(float(ephemdata.elevation)/1000.0,'.2f') 
-    return height
+def sat_height_calc(satellite):
+    t = ts.now()
+    subpoint = wgs84.subpoint(satellite.at(t))
+    return format(subpoint.elevation.km, '.2f')
 ## Calculates sat eclipse status
-def sat_eclipse_calc(ephemdata):
-    ephemdata.compute(myloc)
-    eclipse = ephemdata.eclipsed
-    if eclipse:
-        return "☾"
+def sat_eclipse_calc(satellite):
+    t = ts.now()
+    sat_at_time = satellite.at(t)
+    sun = load('de421.bsp').sun
+    sun_at_time = sun.at(t)
+    earth = load('de421.bsp').earth
+    earth_at_time = earth.at(t)
+    sat_distance = sat_at_time.distance.km  # Satellite's distance from Earth in km
+    sun_distance = sun_at_time.distance.km  # Sun's distance from Earth in km
+    earth_radius = 6371  # Earth radius in km
+    umbra_radius = 1.4 * earth_radius  # Approximate umbra size (a simplification)
+
+    if sat_distance < umbra_radius:
+        eclipse = True
     else:
-        return "☀︎"
+        eclipse = False
+    if eclipse:
+        return "☾"  # Satellite is in Earth's shadow
+    else:
+        return "☀︎"  # Satellite is in sunlight
 ## Calculates sat footprint diameter
 def footprint_radius_km(alt_km):
     return 6371 * np.arccos(6371 / (6371 + alt_km))    
@@ -150,10 +189,7 @@ i_cal = 0
 doppler_thres = 0
 FM_update_time = 0.3
 
-myloc = ephem.Observer()
-myloc.lon = LONGITUDE
-myloc.lat = LATITUDE
-myloc.elevation = ALTITUDE
+observer = Topos(latitude_degrees=float(LATITUDE), longitude_degrees=float(LONGITUDE))
 
 TRACKING_ACTIVE = True # tracking on/off
 INTERACTIVE = False # read user vfo/dial input - disable for inband packet
@@ -949,7 +985,7 @@ class MainWindow(QMainWindow):
                 
                 for index, line in enumerate(data):
                     if str(self.my_satellite.name) in line:
-                        self.my_satellite.tledata = ephem.readtle(data[index], data[index+1], data[index+2])
+                        self.my_satellite.tledata = EarthSatellite(data[index+1], data[index+2], data[index], ts) #ephem.readtle(data[index], data[index+1], data[index+2])
                         break
         except IOError:
             raise MyError()
@@ -1294,8 +1330,8 @@ class MainWindow(QMainWindow):
             sys.exit()
     
     def recurring_utc_clock_timer(self):
-        date_val = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M:%S.%f')[:-3]
-        myloc.date = ephem.Date(date_val)
+        #date_val = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M:%S.%f')[:-3]
+        date = load.timescale() #ephem.Date(date_val)
         self.log_time_val.setText(datetime.now(timezone.utc).strftime('%H:%M:%S')+"z")
         if icomTrx.is_connected():
             self.log_rig_state_val.setText("✔")
@@ -1308,10 +1344,7 @@ class MainWindow(QMainWindow):
     def recurring_timer(self):
         try:
             date_val = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M:%S.%f')[:-3]
-            myloc.date = ephem.Date(date_val)
-            #date_val = strftime('%Y/%m/%d %H:%M:%S', gmtime())
-            #myloc.date = ephem.Date(date_val)
-            #print(myloc.date)
+            date = load.timescale()#ephem.Date(date_val)
             
             self.my_satellite.down_doppler_old = self.my_satellite.down_doppler
             self.my_satellite.down_doppler = float(rx_doppler_val_calc(self.my_satellite.tledata,self.my_satellite.F))
