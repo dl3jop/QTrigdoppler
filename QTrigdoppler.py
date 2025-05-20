@@ -33,6 +33,9 @@ import sounddevice as sd
 from lib import rotator
 from lib.sat_utils import *
 from lib.logbook_connector import *
+import pynmea2
+import serial
+from lib.gps_reader import GPSReader
 
 # Set logging level back to WARNING
 logging.basicConfig(level = logging.WARNING)
@@ -125,7 +128,7 @@ if WEBAPI_ENABLED or REMOTE_ENABLED:
     from lib import web_api_proxy
 
 ### Global constants
-subtone_list = ["None", "67 Hz", "71.9 Hz", "74.4 Hz", "141.3 Hz"]
+subtone_list = ["None", "67 Hz", "71.9 Hz", "74.4 Hz"]
 if DISPLAY_MAP:
     GEOD = Geod(ellps="WGS84")
 
@@ -1221,6 +1224,31 @@ class MainWindow(QMainWindow):
         adv_settings_value_layout.addWidget(self.passrec_settings_box, stretch=1)
         # --- End Pass Recording Settings UI ---
         
+        # --- GPS QTH Settings UI ---
+        self.gps_settings_box = QGroupBox("GPS QTH")
+        self.gps_settings_box.setStyleSheet("QGroupBox{padding-top:15px;padding-bottom:5px; margin-top:5px}")
+        gps_settings_layout = QGridLayout()
+        # Enable checkbox
+        self.gps_enable_checkbox = QCheckBox("Use GPS for QTH")
+        gps_settings_layout.addWidget(self.gps_enable_checkbox, 0, 0, 1, 2)
+        # Serial port dropdown
+        self.gps_serialport_label = QLabel("GPS Serial Port:")
+        gps_settings_layout.addWidget(self.gps_serialport_label, 1, 0)
+        self.gps_serialport_val = QComboBox()
+        gps_ports = [port.device for port in list_ports.comports()]
+        self.gps_serialport_val.addItems(gps_ports)
+        gps_settings_layout.addWidget(self.gps_serialport_val, 1, 1)
+        # Status label
+        self.gps_status_label = QLabel("GPS Status: Not connected")
+        gps_settings_layout.addWidget(self.gps_status_label, 2, 0, 1, 2)
+        # Lock button
+        self.gps_lock_button = QPushButton("Lock Current Position")
+        self.gps_lock_button.setEnabled(False)
+        gps_settings_layout.addWidget(self.gps_lock_button, 3, 0, 1, 2)
+        self.gps_settings_box.setLayout(gps_settings_layout)
+        adv_settings_value_layout.addWidget(self.gps_settings_box, stretch=1)
+        # --- End GPS QTH Settings UI ---
+        
         ###  UI Layout / Tab Widget
         self.tab_widget = QTabWidget()
         self.tab_overview = QWidget()
@@ -1252,6 +1280,19 @@ class MainWindow(QMainWindow):
         self._last_cloudlog_F = None
         self._last_cloudlog_I = None
         self.pass_recorder = PassRecorder(configur)
+        self.gps_enable_checkbox.toggled.connect(self.toggle_gps_qth)
+        self.gps_reader = None
+        self.gps_last_port = None
+        self.gps_lock_button.clicked.connect(self.lock_gps_position)
+        # Set last used port if available
+        last_gps_port = configur.get('qth', 'gps_port', fallback=None)
+        if last_gps_port and last_gps_port in gps_ports:
+            self.gps_serialport_val.setCurrentText(last_gps_port)
+            if self.gps_enable_checkbox.isChecked():
+                self.start_gps_reader()
+        elif last_gps_port:
+            self.gps_status_label.setText("GPS Status: Saved port not available")
+            self.gps_enable_checkbox.setChecked(False)
     
     def save_settings(self):
         global LATITUDE
@@ -1386,6 +1427,10 @@ class MainWindow(QMainWindow):
         configur['passrecording']['sample_rate'] = str(self.passrec_samplerate_spin.value())
         configur['passrecording']['channels'] = str(self.passrec_channels_spin.value())
         configur['passrecording']['bit_depth'] = str(self.passrec_bitdepth_spin.value())
+
+        # GPS QTH settings
+        configur['qth']['use_gps'] = str(self.gps_enable_checkbox.isChecked())
+        configur['qth']['gps_port'] = self.gps_serialport_val.currentText()
 
         with open('config.ini', 'w') as configfile:
             configur.write(configfile)
@@ -2370,6 +2415,73 @@ class MainWindow(QMainWindow):
                 self.update_passrecorder_status()
             except Exception as e2:
                 logging.error(f"Fallback elevation calculation also failed: {e2}")
+
+    def toggle_gps_qth(self, enabled):
+        if enabled:
+            self.gps_status_label.setText("GPS Status: Starting...")
+            self.start_gps_reader()
+            self.gps_lock_button.setEnabled(True)
+        else:
+            self.stop_gps_reader()
+            self.gps_lock_button.setEnabled(False)
+
+    def lock_gps_position(self):
+        self.stop_gps_reader()
+        # Do NOT uncheck the checkbox; leave GPS QTH enabled until restart or user action
+        self.gps_lock_button.setEnabled(False)
+        self.gps_status_label.setText("GPS Status: Locked at last fix")
+
+    def start_gps_reader(self):
+        port = self.gps_serialport_val.currentText()
+        if not port:
+            self.gps_status_label.setText("GPS Status: No port selected")
+            return
+        if self.gps_reader:
+            self.stop_gps_reader()
+        try:
+            self.gps_reader = GPSReader(port)
+            self.gps_reader.position_update.connect(self.on_gps_position_update)
+            self.gps_reader.status_update.connect(self.handle_gps_status_update)
+            self.gps_reader.start()
+            self.gps_last_port = port
+            self.gps_status_label.setText(f"GPS Status: Connecting to {port}")
+            self.gps_lock_button.setEnabled(True)
+        except Exception as e:
+            self.gps_status_label.setText(f"GPS Status: Could not open port: {e}")
+            self.gps_enable_checkbox.setChecked(False)
+
+    def stop_gps_reader(self):
+        if self.gps_reader:
+            self.gps_reader.stop()
+            self.gps_reader.wait()
+            self.gps_reader = None
+        self.gps_status_label.setText("GPS Status: Not connected")
+        self.gps_lock_button.setEnabled(False)
+
+    def handle_gps_status_update(self, status):
+        # Handle disconnects and no fix
+        if "Error" in status or "Disconnected" in status:
+            self.gps_status_label.setText(f"GPS Status: {status}")
+            self.gps_lock_button.setEnabled(False)
+        elif "No fix" in status:
+            self.gps_status_label.setText(f"GPS Status: {status}")
+            self.gps_lock_button.setEnabled(False)
+        else:
+            self.gps_status_label.setText(f"GPS Status: {status}")
+            self.gps_lock_button.setEnabled(True)
+
+    def on_gps_position_update(self, lat, lon, alt):
+        # Update QTH fields and config
+        self.qth_settings_lat_edit.setText(str(lat))
+        self.qth_settings_long_edit.setText(str(lon))
+        self.qth_settings_alt_edit.setText(str(alt))
+        configur['qth']['latitude'] = str(lat)
+        configur['qth']['longitude'] = str(lon)
+        configur['qth']['altitude'] = str(alt)
+        with open('config.ini', 'w') as configfile:
+            configur.write(configfile)
+        self.gps_status_label.setText("GPS Status: Fix received")
+        self.gps_lock_button.setEnabled(True)
 
 class WorkerSignals(QObject):
     finished = Signal()

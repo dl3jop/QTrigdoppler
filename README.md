@@ -86,6 +86,8 @@ DL3JOP modifications: <br/>
     1) Changed to PySide<br/>
     2) Implemented Websocket features using Flask and SocketIO<br/>
     3) Added Cloudlog/Wavelog integration: automatic logging of frequency and satellite info via Cloudlog API, configurable in config.ini.<br/>
+    4) Added ability to automatically record satellite passes to .wav files.
+    5) Added support to use USB / Serial GPS units to get location position.
     
     
 # 🎯 Roadmap

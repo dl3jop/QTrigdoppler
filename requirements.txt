@@ -12,3 +12,4 @@ Flask-SocketIO
 requests
 python-socketio[client]
 sounddevice
+pynmea2

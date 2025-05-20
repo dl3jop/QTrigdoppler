@@ -245,8 +245,8 @@ class PassRecorder:
         # Ensure save directory exists
         os.makedirs(self.save_dir, exist_ok=True)
         
-        # File name: satname-YYYYMMDD-HHMMSS.wav
-        start_time = datetime.now().strftime('%Y%m%d-%H%M%S')
+        # File name: satname-YYYYMMDD-HHMMSS.wav (using UTC time for amateur radio standard)
+        start_time = datetime.utcnow().strftime('%Y%m%d-%H%M%S')
         safe_satname = ''.join(c for c in satname if c.isalnum() or c in ('-_')).rstrip()
         filename = f"{safe_satname}-{start_time}.wav"
         filepath = os.path.join(self.save_dir, filename)
