@@ -36,14 +36,11 @@ predictive_doppler = True            # Enable predictive algorithms
 
 ### Predictive Doppler
 
-**Enable for high-latitude locations** (Scotland, Scandinavia, Northern Canada):
+The adaptive prediction algorithm is now recommended for most users, as it improves tracking accuracy during periods of rapid doppler shift changes, which are common for LEO satellites. It is particularly effective for high-latitude locations.
+
+To enable it, set the following in your `config.ini`:
 ```ini
 predictive_doppler = True
-```
-
-**Disable for lower-latitude locations** (Central/Southern Europe, Southern US):
-```ini
-predictive_doppler = False
 ```
 
 ## 🎛️ Manual Frequency Control
@@ -153,13 +150,14 @@ The system automatically limits rapid frequency changes:
 
 ### Predictive Timing
 
-When predictive doppler is enabled:
+When predictive doppler is enabled, the algorithm adaptively changes the prediction time based on the rate of doppler shift change:
 
 | Doppler Rate | Prediction Time | Use Case |
 |-------------|----------------|----------|
-| **>200 Hz/s** | 300-400ms | High rate (near TCA) |
-| **>100 Hz/s** | 200-250ms | Moderate rate |
-| **Normal** | 100-150ms | Standard tracking |
+| **> 60 Hz/s** | 500ms | Very rapid change (steep passes, near TCA) |
+| **> 30 Hz/s** | 350ms | Moderate rapid change |
+| **> 10 Hz/s** | 250ms | Normal rapid change |
+| **< 10 Hz/s** | 150ms | Slow change |
 
 ## 🎙️ Voice Quality Optimization
 

@@ -5,7 +5,9 @@ Welcome to the QTRigdoppler help system! This directory contains comprehensive d
 ## 📚 Available Documentation
 
 ### 🎯 Quick Start
+- **[Getting Started Guide](getting-started.md)** - Complete setup and first-use tutorial for new users
 - **[Configuration Guide](configuration.md)** - Complete config.ini reference and setup guide
+- **[Radio Configuration](radio-configuration.md)** - Complete guide to ICOM IC-910H setup and operation
 - **[Frequency Control](frequency-control.md)** - Complete guide to doppler correction, manual control, and advanced frequency features
 - **[Remote Operation](remote-operation.md)** - Complete guide to web-based remote control systems
 - **[Cloudlog Integration](cloudlog-integration.md)** - Automatic logbook integration with Cloudlog/Wavelog
@@ -23,8 +25,8 @@ The following help documents are planned for future releases:
 | **Configuration Guide** | Complete config.ini reference | ✅ Available |
 | **Remote Operation** | Web-based remote control systems | ✅ Available |
 | **Cloudlog Integration** | Automatic logbook integration | ✅ Available |
-| **Getting Started Guide** | Complete setup and first-use tutorial | Planned |
-| **Radio Configuration** | Setting up ICOM and other radio models | Planned |
+| **Getting Started Guide** | Complete setup and first-use tutorial | ✅ Available |
+| **Radio Configuration** | Setting up ICOM IC-910H radio | ✅ Available |
 | **Satellite Operations** | Best practices for satellite tracking | Planned |
 | **Rotator Setup** | Configuring antenna rotators | ✅ Available |
 | **Troubleshooting** | Common issues and solutions | Planned |
@@ -33,7 +35,9 @@ The following help documents are planned for future releases:
 ## 🆘 Need Help?
 
 ### Quick Links
+- **[Getting Started Guide](getting-started.md)** - Complete setup and first-use tutorial for new users
 - **[Configuration Guide](configuration.md)** - Complete config.ini reference and setup
+- **[Radio Configuration](radio-configuration.md)** - ICOM IC-910H setup and operation
 - **[Frequency Control](frequency-control.md)** - Doppler correction, manual control, and advanced frequency features
 - **[Remote Operation](remote-operation.md)** - Web-based remote control systems
 - **[Cloudlog Integration](cloudlog-integration.md)** - Automatic logbook integration
@@ -51,10 +55,10 @@ The following help documents are planned for future releases:
 ## 🎯 Getting Started
 
 ### New Users
-1. Read the main [README.md](../README.md) for initial setup
-2. Follow the [Configuration Guide](configuration.md) to set up your config.ini
-3. Configure your radio and location settings
-4. Update your satellite database using the "Update Satellite Database" button in Settings
+1. Start with the [Getting Started Guide](getting-started.md) for complete setup tutorial
+2. Read the main [README.md](../README.md) for installation options
+3. Follow the [Radio Configuration](radio-configuration.md) to set up your IC-910H
+4. Use the [Configuration Guide](configuration.md) for advanced config.ini settings
 5. Try the [keyboard shortcuts](keyboard-shortcuts.md) for efficient operation
 
 ### Experienced Users
