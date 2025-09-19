@@ -2329,13 +2329,22 @@ class MainWindow(QMainWindow):
                 #################################
 
                 if RADIO == "910" and self.my_satellite.rig_satmode == 0 and RX_TPX_ONLY == False:
-                    icomTrx.setSatelliteMode(0)
+                    icomTrx.setSatelliteMode910(0)
                     icomTrx.setSplitOn(1)
                 elif RADIO == "910" and self.my_satellite.rig_satmode == 0 and RX_TPX_ONLY == True:
-                    icomTrx.setSatelliteMode(0)
+                    icomTrx.setSatelliteMode910(0)
                     icomTrx.setSplitOn(0)
                 elif RADIO == "910" and self.my_satellite.rig_satmode == 1:
-                    icomTrx.setSatelliteMode(1)
+                    icomTrx.setSatelliteMode910(1)
+                    icomTrx.setSplitOn(0)
+                elif RADIO == "9700" and self.my_satellite.rig_satmode == 0 and RX_TPX_ONLY == False:
+                    icomTrx.setSatelliteMode9700(0)
+                    icomTrx.setSplitOn(1)
+                elif RADIO == "9700" and self.my_satellite.rig_satmode == 0 and RX_TPX_ONLY == True:
+                    icomTrx.setSatelliteMode9700(0)
+                    icomTrx.setSplitOn(0)
+                elif RADIO == "9700" and self.my_satellite.rig_satmode == 1:
+                    icomTrx.setSatelliteMode9700(1)
                     icomTrx.setSplitOn(0)
                 elif ( RADIO == "705" or "818" ) and OPMODE == False and self.my_satellite.rig_satmode == 0: #not implemented yet
                     logging.error("*** Not implemented yet mate***")
@@ -2345,7 +2354,7 @@ class MainWindow(QMainWindow):
                 #       SETUP DOWNLINK & UPLINK
                 #################################
 
-                if RADIO == "910":
+                if RADIO == "910" or RADIO == "9700":
                     # Testing current satmode config for V/U or U/V and swapping if needed
                     icomTrx.setVFO("Main")
                     freq_str = icomTrx.getFrequency()
@@ -2367,7 +2376,7 @@ class MainWindow(QMainWindow):
                             
                     doppler_thres, INTERACTIVE = icomTrx.setup_vfos(self.my_satellite.rig_satmode,self.my_satellite.downmode, self.my_satellite.upmode, DOPPLER_THRES_FM, DOPPLER_THRES_LINEAR)
                     
-                elif RADIO != "910":
+                else:
                     logging.error("*** Not implemented yet mate***")
                     sys.exit()
 

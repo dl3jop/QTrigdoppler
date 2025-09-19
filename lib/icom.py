@@ -133,11 +133,17 @@ class icom:
         self.__writeToIcom(b'\x07\xB0')
 
     # change main and sub
-    def setSatelliteMode(self, on):
+    def setSatelliteMode910(self, on):
         if on:
             self.__writeToIcom(b'\x1A\x07\x01')
         else:
             self.__writeToIcom(b'\x1A\x07\x00')
+            
+    def setSatelliteMode9700(self, on):
+        if on:
+            self.__writeToIcom(b'\x16\x5A\x01')
+        else:
+            self.__writeToIcom(b'\x16\x5A\x00')
 
 
     # Parameter: hertz string with 3 numbers
