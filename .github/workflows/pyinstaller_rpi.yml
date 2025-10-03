@@ -13,10 +13,10 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Run on ARM (Raspberry Pi emulation)
+      - name: Run on ARM (Raspberry Pi 4/5 emulation)
         uses: uraimo/run-on-arch-action@v2
         with:
-          arch: armv7
+          arch: aarch64
           distro: bullseye
           githubToken: ${{ github.token }}
           run: |
