@@ -28,9 +28,9 @@ QTRigdoppler now comes with many themes you can choose from. A brief selection o
 # 📚 Documentation
 
 For detailed setup and usage instructions, see the [help documentation](help/):
-
-- **[Installation Guide](help/installation.md)** - Install QTRigdoppler on your system
+- **[Getting Started Guide](getting-started.md)** - Complete setup and first-use tutorial for new users
 - **[Configuration Guide](help/configuration.md)** - Complete config.ini reference and setup
+- **[Radio Configuration](radio-configuration.md)** - Complete guide to setup your ICOM IC-910H or IC-9700 for operation
 - **[Frequency Control](help/frequency-control.md)** - Doppler correction, manual control, and advanced frequency features
 - **[Remote Operation](help/remote-operation.md)** - Web-based remote control systems  
 - **[Cloudlog Integration](help/cloudlog-integration.md)** - Automatic logbook integration with Cloudlog/Wavelog
