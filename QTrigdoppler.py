@@ -2482,18 +2482,9 @@ class MainWindow(QMainWindow):
                         if updated_rx and vfo_not_moving and vfo_not_moving_old:#old_user_Freq == user_Freq and False:
                             # Use predictive doppler for linear satellites if enabled, especially around TCA
                             if self.my_satellite.downmode in ["USB", "LSB", "CW"] and PREDICTIVE_DOPPLER:
-                                # Calculate current doppler rate to determine prediction time
-                                current_doppler_rate = abs(self.my_satellite.down_doppler_rate) if hasattr(self.my_satellite, 'down_doppler_rate') else 0
-                                
-                                # Use more prediction when doppler rate is high (around TCA)
-                                if current_doppler_rate > 200:  # High rate - likely near TCA
-                                    prediction_time = 0.4  # 400ms prediction
-                                elif current_doppler_rate > 100:  # Moderate rate  
-                                    prediction_time = 0.25  # 250ms prediction
-                                else:
-                                    prediction_time = 0.15  # 150ms prediction for normal tracking
-                                
-                                new_rx_doppler = rx_dopplercalc_predictive(self.my_satellite.tledata, self.my_satellite.F + self.my_satellite.F_cal, myloc, prediction_time)
+                                # Use the new adaptive prediction algorithm - no need to pass prediction_time
+                                # The function now automatically determines optimal prediction time internally
+                                new_rx_doppler = rx_dopplercalc_predictive(self.my_satellite.tledata, self.my_satellite.F + self.my_satellite.F_cal, myloc)
                             else:
                                 # Use standard calculation for FM satellites or when predictive doppler is disabled
                                 new_rx_doppler = round(rx_dopplercalc(self.my_satellite.tledata, self.my_satellite.F + self.my_satellite.F_cal, myloc))
@@ -2510,17 +2501,9 @@ class MainWindow(QMainWindow):
                         
                             # Apply predictive correction to TX as well for linear satellites
                             if self.my_satellite.upmode in ["USB", "LSB", "CW"]:
-                                # Use same prediction time as RX
-                                current_doppler_rate = abs(self.my_satellite.up_doppler_rate) if hasattr(self.my_satellite, 'up_doppler_rate') else 0
-                                
-                                if current_doppler_rate > 200:  # High rate - likely near TCA
-                                    prediction_time = 0.4  # 400ms prediction
-                                elif current_doppler_rate > 100:  # Moderate rate
-                                    prediction_time = 0.25  # 250ms prediction  
-                                else:
-                                    prediction_time = 0.15  # 150ms prediction for normal tracking
-                                    
-                                new_tx_doppler = tx_dopplercalc_predictive(self.my_satellite.tledata, self.my_satellite.I, myloc, prediction_time)
+                                # Use the new adaptive prediction algorithm - no need to pass prediction_time
+                                # The function now automatically determines optimal prediction time internally
+                                new_tx_doppler = tx_dopplercalc_predictive(self.my_satellite.tledata, self.my_satellite.I, myloc)
                             else:
                                 # Use standard calculation for FM satellites
                                 new_tx_doppler = round(tx_dopplercalc(self.my_satellite.tledata, self.my_satellite.I, myloc))
@@ -2562,18 +2545,9 @@ class MainWindow(QMainWindow):
                         # Non-interactive mode for linear satellites (SSB packet, etc.)
                         # Use predictive doppler for better TCA tracking if enabled
                         if self.my_satellite.downmode in ["USB", "LSB", "CW"] and PREDICTIVE_DOPPLER:
-                            # Calculate prediction time based on doppler rate  
-                            current_doppler_rate = abs(self.my_satellite.down_doppler_rate) if hasattr(self.my_satellite, 'down_doppler_rate') else 0
-                            
-                            if current_doppler_rate > 200:  # High rate - likely near TCA
-                                prediction_time = 0.3  # 300ms prediction for non-interactive
-                            elif current_doppler_rate > 100:  # Moderate rate
-                                prediction_time = 0.2  # 200ms prediction
-                            else:
-                                prediction_time = 0.1  # 100ms prediction for normal tracking
-                                
-                            new_rx_doppler = rx_dopplercalc_predictive(self.my_satellite.tledata, self.my_satellite.F + self.my_satellite.F_cal, myloc, prediction_time)
-                            new_tx_doppler = tx_dopplercalc_predictive(self.my_satellite.tledata, self.my_satellite.I, myloc, prediction_time)
+                            # Use the new adaptive prediction algorithm - automatically determines optimal prediction time
+                            new_rx_doppler = rx_dopplercalc_predictive(self.my_satellite.tledata, self.my_satellite.F + self.my_satellite.F_cal, myloc)
+                            new_tx_doppler = tx_dopplercalc_predictive(self.my_satellite.tledata, self.my_satellite.I, myloc)
                         else:
                             # Standard calculation for FM or other modes, or when predictive doppler is disabled
                             new_rx_doppler = round(rx_dopplercalc(self.my_satellite.tledata,self.my_satellite.F + self.my_satellite.F_cal, myloc))
