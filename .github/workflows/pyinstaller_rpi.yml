@@ -23,7 +23,7 @@ jobs:
             apt-get update
             apt-get install -y python3 python3-pip python3-dev zip
             pip3 install --upgrade pip
-            pip3 install -r requirements.txt
+            pip3 install --no-compile -r requirements.txt
             pip3 install pyinstaller
             pyinstaller QTrigdoppler.py --noconsole --exclude PyQt6 --splash images/splash.jpg
             mkdir package
