@@ -4,17 +4,16 @@ Welcome to QTrigdoppler! This comprehensive guide will take you from installatio
 
 ## 🎯 What is QTrigdoppler?
 
-QTrigdoppler is a powerful satellite tracking application that automates frequency control for your ICOM IC-910H radio during satellite passes. It handles doppler shift correction, transponder selection, and can control antenna rotators for a complete automated satellite station.
+QTrigdoppler is a powerful satellite tracking application that automates frequency control for your ICOM IC-910H or IC-9700 radio during satellite passes. It handles doppler shift correction, transponder selection, and can control antenna rotators for a complete automated satellite station.
 
 ### Key Features
 - **Automatic Doppler Correction**: Real-time frequency tracking during satellite passes
-- **ICOM IC-910H Support**: Direct CI-V control of your radio
 - **Transponder Management**: Smart selection of satellite transponders
 - **Rotator Control**: Automated antenna pointing
 - **Remote Operation**: Web-based control from anywhere
 - **Pass Recording**: Automatic audio recording of satellite contacts
 - **GPS Integration**: Automatic location determination
-- **Cloudlog Integration**: Automatic logging to your online logbook
+- **Cloudlog/Wavelog Integration**: Automatic logging to your online logbook
 
 ## 📦 Installation
 
@@ -33,7 +32,7 @@ QTrigdoppler is a powerful satellite tracking application that automates frequen
 sudo apt update
 
 # Install required packages
-sudo apt install git python3 python3-pyqt5 python3-qt-material python3-ephem python3-numpy
+sudo apt install git python3 python3-pyside6.qtcore python3-pyside6.qtgui python3-pyside6.qtwidgets python3-pyside6.qtuitools python3-qt-material python3-ephem python3-numpy
 
 # Add user to dialout group for serial port access
 sudo adduser $USER dialout
@@ -65,6 +64,9 @@ git clone https://github.com/dl3jop/QTrigdoppler.git
 cd QTrigdoppler
 python3 QTrigdoppler.py
 ```
+### Note: Install on systems using pip
+For system using pip as a python package management you need to install the dependencies using the provided requirements.txt in the repository after cloning it:
+`pip install -r /path/to/requirements.txt`
 
 ## 🔧 Initial Setup
 
@@ -165,7 +167,7 @@ Fresh satellite data is crucial for accurate tracking.
 
 ### Step 4: After the Pass
 
-1. **Logging**: If Cloudlog integration is enabled, contacts are automatically logged
+1. **Logging**: If Cloudlog/Wavelog integration is enabled, contacts are automatically logged
 2. **Recordings**: If pass recording is enabled, audio files are automatically saved
 3. **Next Pass**: Select the next satellite for tracking
 
@@ -203,7 +205,7 @@ Control how sensitive frequency tracking is:
 - **GPS Integration**: Automatic location determination
 - **Remote Access**: Web-based control interface
 - **Pass Recording**: Automatic audio recording
-- **Cloudlog Integration**: Automatic contact logging
+- **Cloudlog/Wavelog Integration**: Automatic contact logging
 
 ## 🚨 Troubleshooting Common Issues
 
@@ -259,7 +261,7 @@ Once you have the basics working, explore these guides for enhanced functionalit
 - **[Remote Operation](remote-operation.md)** - Control your station from anywhere
 - **[Pass Recording](pass-recording.md)** - Automatic audio recording setup
 - **[GPS Integration](gps-integration.md)** - Automatic location determination
-- **[Cloudlog Integration](cloudlog-integration.md)** - Automatic logging to online logbooks
+- **[Cloudlog/Wavelog Integration](cloudlog-integration.md)** - Automatic logging to online logbooks
 - **[Keyboard Shortcuts](keyboard-shortcuts.md)** - Efficient operation tips
 
 ### Advanced Features
@@ -300,6 +302,6 @@ As you become comfortable with basic operation, consider exploring:
 
 QTrigdoppler automates the technical complexity so you can focus on making contacts and enjoying the hobby. Start with simple FM satellites, master the basics, then gradually explore more advanced features and satellite modes.
 
-**Document Version**: 1.0  
-**Last Updated**: August 2025  
-**Supported Hardware**: ICOM IC-910H
+**Document Version**: 1.1  
+**Last Updated**: October 2025  
+**Supported Hardware**: ICOM IC-910H, IC-9700H

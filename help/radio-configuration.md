@@ -1,16 +1,16 @@
-# Radio Configuration - ICOM IC-910H
+# Radio Configuration - ICOM IC-910H and IC-9700
 
-This guide covers the complete setup and configuration of the ICOM IC-910H transceiver with QTrigdoppler for satellite operations.
+This guide covers the complete setup and configuration of the ICOM IC-910H and IC-9700 transceivers with QTrigdoppler for satellite operations.
 
 ## 📡 Overview
 
-QTrigdoppler supports the **ICOM IC-910H** exclusively for radio control via CI-V (Computer Interface V) protocol. The software provides automatic frequency tracking with doppler correction, mode switching, and VFO management for satellite operations.
+QTrigdoppler supports the **ICOM IC-910H** and **ICOM IC-9700** exclusively for radio control via CI-V (Computer Interface V) protocol. The software provides automatic frequency tracking with doppler correction, mode switching, and VFO management for satellite operations.
 
 ## 🔧 Hardware Requirements
 
 ### Required Equipment
-- **ICOM IC-910H** transceiver
-- **CI-V Interface Cable** or **USB-to-Serial adapter**
+- **ICOM IC-910H** or **ICOM IC-9700** transceiver
+- **CI-V Interface Cable** or **USB-to-Serial adapter** or **USB-A to USB-B cable**(for IC9700)
 - **Computer** running QTrigdoppler
 
 ### Connection Options
@@ -20,7 +20,7 @@ QTrigdoppler supports the **ICOM IC-910H** exclusively for radio control via CI-
 
 ## ⚙️ Radio Setup
 
-### 1. IC-910H Configuration
+### 1. Radio Configuration
 
 #### CI-V Settings on Radio
 1. **Access Menu**: Press `[MENU]` on your IC-910H
@@ -42,6 +42,8 @@ QTrigdoppler supports the **ICOM IC-910H** exclusively for radio control via CI-
   - Main VFO (VFO-A): Downlink frequency
   - Sub VFO (VFO-B): Uplink frequency
 - **Split Operation**: Automatic when in satellite mode
+
+ToDo: describe the same proceudre for the IC-9700
 
 ### 2. Computer Interface Setup
 
@@ -76,11 +78,10 @@ QTrigdoppler provides a user-friendly Settings interface accessible through the 
 
 | Setting | GUI Label | Value | Description |
 |---------|-----------|-------|-------------|
-| **Radio Model** | Radio | `910` | Select IC-910H from dropdown or enter 910 |
+| **Radio Model** | Radio | `910` | Select IC-910H or IC-9700 from dropdown |
 | **CI-V Address** | CVI Address (hex) | `60` | Enter the CI-V address (must match radio) |
 | **Serial Port** | Serial Port | `COM1` (Windows) or `/dev/ttyUSB0` (Linux) | Select from dropdown or enter manually |
-| **Rig Type** | Rig Type | `EU`/`US`/`JP` | Select your regional variant |
-| **Full Mode** | Full Mode Control | `False` | Checkbox - typically unchecked |
+| **Rig Type** | Rig Type | `EU`/`US` | Select your regional variant |
 
 4. **Apply Settings**: Click `Apply` or `Save` to store the configuration
 5. **Test Connection**: The status should show radio connection status
@@ -114,29 +115,22 @@ rig_type = EU                   # Frequency range (EU/US/JP)
 - **Range**: 0-255 (decimal), typically specified in hex
 - **Required**: Yes
 
-#### `fullmode = False`
-- **Purpose**: Controls how extensively QTrigdoppler manages radio settings
-- **Recommended**: `False` for most users
-- **When True**: Software controls more radio parameters automatically
-- **When False**: User retains more manual control
-
 #### `serialport`
 - **Windows**: `COM1`, `COM3`, `COM4`, etc.
 - **Linux**: `/dev/ttyUSB0`, `/dev/ttyUSB1`, `/dev/ttyACM0`, etc.
 - **Purpose**: Defines which serial port to use for CI-V communication
 - **Required**: Yes
 
-#### `rig_type = EU/US/JP`
+#### `rig_type = EU/US`
 - **Purpose**: Sets frequency ranges and features based on regional radio variants
-- **EU**: European frequency allocations
-- **US**: United States frequency allocations and TSQL support
-- **JP**: Japanese frequency allocations
+- **EU**: European version with TONE support
+- **US**: United States version with TSQL support
 - **Important**: US users must set this to `US` for proper TSQL/TONE operation
 
 ## 🎛️ Operating Modes
 
 ### Supported Modes
-QTrigdoppler supports the following modes on the IC-910H:
+QTrigdoppler supports the following modes on the IC-910H and IC-9700:
 
 | Mode | Description | Use Case |
 |------|-------------|----------|
@@ -149,29 +143,6 @@ QTrigdoppler supports the following modes on the IC-910H:
 - **FM Satellites**: Automatically selects FM mode
 - **Linear Transponders**: Automatically selects USB/LSB based on frequency
 - **Digital Data Modes**: Uses USB/LSB modes (IC-910H does not have separate DATA modes)
-
-## 📡 Satellite Operation Features
-
-### VFO Management
-- **Satellite Mode**: Automatically enabled for V/U and U/V satellites
-- **Split Mode**: Used for V/V and U/U operations
-- **VFO Selection**:
-  - Main (VFO-A): Receive frequency
-  - Sub (VFO-B): Transmit frequency
-
-### Doppler Correction
-- **Automatic Tracking**: Real-time frequency adjustment
-- **Threshold Settings**:
-  - FM Mode: 200 Hz threshold (configurable via `doppler_threshold_fm`)
-  - Linear Mode: 50 Hz threshold (configurable via `doppler_threshold_linear`)
-- **Interactive vs. Non-Interactive**:
-  - **Interactive**: Manual frequency adjustments preserved
-  - **Non-Interactive**: Full automatic control for data modes
-
-### Frequency Control
-- **Real-time Updates**: Continuous tracking during satellite passes
-- **Manual Override**: User can manually adjust frequencies when needed
-- **Offset Support**: Pre-configured offsets for specific satellites/transponders
 
 ## 🔍 Troubleshooting
 
@@ -232,15 +203,13 @@ INFO: CI-V communication established
 4. **Cable Length**: Keep CI-V cables as short as practical
 
 ### Operating Tips
-1. **Satellite Mode**: Always enable satellite mode on IC-910H for V/U operations
-2. **Manual Backup**: Learn manual frequency control as backup
-3. **Pre-check**: Test radio communication before important passes
-4. **Monitoring**: Keep radio display visible to monitor frequency changes
+1. **Manual Backup**: Learn manual frequency control as backup
+2. **Pre-check**: Test radio communication before important passes
+3. **Monitoring**: Keep radio display visible to monitor frequency changes
 
 ### Performance Optimization
 1. **Doppler Thresholds**: Adjust thresholds based on your operating preferences
 2. **Update Rate**: CI-V updates occur automatically during satellite passes
-3. **Mode Switching**: Allow automatic mode switching for optimal performance
 
 ## 📚 Advanced Configuration
 
@@ -264,10 +233,10 @@ satoffset3 = JO-97,SSB Transponder,0,-2000
 ### Technical Support
 - **Log Files**: Always check `logs/qtrigdoppler.log` for detailed error information
 - **Community Forums**: Amateur radio satellite operation communities
-- **Hardware Manuals**: Refer to IC-910H operating manual for radio-specific questions
+- **Hardware Manuals**: Refer to IC-910H or IC-9700 operating manual for radio-specific questions
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: August 2025  
-**Supported Radio**: ICOM IC-910H only
+**Document Version**: 1.1  
+**Last Updated**: October 2025  
+**Supported Radios**: ICOM IC-910H, ICOM IC-9700 
