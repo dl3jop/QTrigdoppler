@@ -1,0 +1,45 @@
+name: Build QTrigdoppler multifile executables
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  raspberrypi:
+    name: Raspberry Pi Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Run on ARM (Raspberry Pi emulation)
+        uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: armv7
+          distro: bullseye
+          githubToken: ${{ github.token }}
+          run: |
+            apt-get update
+            apt-get install -y python3 python3-pip python3-dev zip
+            pip3 install --upgrade pip
+            pip3 install -r requirements.txt
+            pip3 install pyinstaller
+            pyinstaller QTrigdoppler.py --noconsole --exclude PyQt6 --splash images/splash.jpg
+            mkdir package
+            cp -r dist/QTrigdoppler/* package/
+            cp config.ini doppler.sqf mykepler.txt package/
+            cd package
+            zip -r ../QTrigdoppler-multifile-raspi.zip *
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: QTrigdoppler-multifile-raspi
+          path: QTrigdoppler-multifile-raspi.zip
+
+      - name: Upload to GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: QTrigdoppler-multifile-raspi.zip
