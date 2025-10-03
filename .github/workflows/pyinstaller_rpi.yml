@@ -1,4 +1,4 @@
-name: Build QTrigdoppler multifile executables
+name: Build QTrigdoppler multifile ARM/RPI executables
 
 on:
   release:
