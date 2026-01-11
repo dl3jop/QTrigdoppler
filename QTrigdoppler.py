@@ -246,7 +246,7 @@ RIG_CONNECTED = False
 DOPPLER_UPDATE_LOCK = False
 
 if configur['icom']['radio'] == '9700':
-    icomTrx = icom.icom(RIG_SERIAL_PORT, '19200', 96)
+    icomTrx = icom.icom(RIG_SERIAL_PORT, '19200', 0xa2)
 elif configur['icom']['radio'] == '910':
     icomTrx = icom.icom(RIG_SERIAL_PORT, '19200', 96)
 RIG_CONNECTED = icomTrx.is_connected()    
