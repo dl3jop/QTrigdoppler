@@ -461,7 +461,6 @@ class MainWindow(QMainWindow):
                 return (prefix, int(num))
             return (name, 0)
         satlist.sort(key=sat_sort_key)
-        self.combo1.addItems(['Select one...'])
         self.combo1.addItems(satlist)
         self.combo1.currentTextChanged.connect(self.sat_changed) 
         combo_layout.addWidget(self.combo1)
@@ -470,7 +469,6 @@ class MainWindow(QMainWindow):
         self.tpxtext.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
         combo_layout.addWidget(self.tpxtext)
         self.combo2 = QComboBox()
-        self.combo2.addItems(['Select Sat first...'])
         self.tpx_list_view = self.combo1.view()
         self.tpx_list_view.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)        
         QScroller.grabGesture(self.tpx_list_view.viewport(), QScroller.LeftMouseButtonGesture)
@@ -791,6 +789,7 @@ class MainWindow(QMainWindow):
         log_rig_status_layout.setColumnStretch(2, 1)
         log_rig_status_layout.setColumnStretch(3, 1)
         log_rig_status_layout.setColumnStretch(4, 1)
+        
 
         ### Settings Tab
         settings_value_layout = QHBoxLayout()
@@ -1405,9 +1404,14 @@ class MainWindow(QMainWindow):
             self.gps_status_label.setText("GPS Status: Saved port not available")
             self.gps_enable_checkbox.setChecked(False)
         
+        # Update gui with current sat
+        self.sat_changed( self.combo1.currentText())
+        # Update stylesheet if applicable
+        self.change_theme(STYLESHEET)
+        
         if TLE_UPDATE_STARTUP:
             self.update_tle_file()
-        self.change_theme(STYLESHEET)
+        
     
     def save_settings(self):
         global LATITUDE
@@ -1644,8 +1648,7 @@ class MainWindow(QMainWindow):
                     logging.error(f"Error broadcasting TLE update to web clients: {e}")
             
             # Reload current satellite TLE data if one is selected
-            if self.my_satellite.name != '':
-                self.sat_changed(self.my_satellite.name)
+            self.sat_changed(self.my_satellite.name)
                 
             logging.info("TLE update completed successfully - satellite data refreshed without restart")
             
@@ -1829,9 +1832,8 @@ class MainWindow(QMainWindow):
                 except Exception as e:
                     logging.error(f"Error broadcasting satellite list update to web clients: {e}")
             
-            # Reload current satellite data if one is selected
-            if self.my_satellite.name != '':
-                self.sat_changed(self.my_satellite.name)
+ 
+            self.sat_changed(self.my_satellite.name)
                 
             logging.info(f"Doppler.sqf update completed successfully ({update_type}) - satellite data refreshed")
             
@@ -1895,11 +1897,8 @@ class MainWindow(QMainWindow):
                 except Exception as e:
                     logging.error(f"Error broadcasting auto TLE update to web clients: {e}")
             
-            # Reload current satellite TLE data if one is selected (without stopping tracking)
-            if self.my_satellite.name != '':
-                # Store current tracking state
+            
                 was_tracking = hasattr(self, 'timer') and self.timer.isActive()
-                
                 # Update satellite data
                 self.sat_changed(self.my_satellite.name)
                 
@@ -1923,14 +1922,6 @@ class MainWindow(QMainWindow):
             
     def sat_changed(self, satname):
         self.my_satellite.name = satname
-        
-        try:
-            text_to_remove = 'Select one...'
-            index = self.combo1.findText(text_to_remove)
-            if index != -1:
-                self.combo1.removeItem(index)
-        except:
-            pass
 
         try:
             with open(SQFILE, 'r') as h:
@@ -2007,11 +1998,10 @@ class MainWindow(QMainWindow):
             unique_satlist.sort(key=sat_sort_key)
             
             # Add items back
-            self.combo1.addItem('Select one...')
             self.combo1.addItems(unique_satlist)
             
             # Restore selection if it still exists
-            if current_selection and current_selection != 'Select one...':
+            if current_selection:
                 for i in range(self.combo1.count()):
                     if self.combo1.itemText(i) == current_selection:
                         self.combo1.setCurrentIndex(i)
