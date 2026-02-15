@@ -1043,7 +1043,7 @@ class MainWindow(QMainWindow):
         # Settings store layout
         settings_store_layout = QVBoxLayout()
         
-        self.SafeSettingsButton = QPushButton("Store Settings - location and UI scale changes require restart")
+        self.SafeSettingsButton = QPushButton("Store Settings - location, radio and UI changes require restart")
         self.SafeSettingsButton.clicked.connect(self.save_settings)
         settings_store_layout.addWidget(self.SafeSettingsButton)
         self.SafeSettingsButton.setEnabled(True)
