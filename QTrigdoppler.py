@@ -2412,6 +2412,7 @@ class MainWindow(QMainWindow):
                 tracking_init = 1
 
                 while TRACKING_ACTIVE == True:
+
                     date_val = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M:%S.%f')[:-3]
                     myloc.date = ephem.Date(date_val)
 
@@ -3219,9 +3220,9 @@ class MainWindow(QMainWindow):
             
             # Create new connection
             if configur['icom']['radio'] == '9700':
-                icomTrx = icom.icom(RIG_SERIAL_PORT, '19200', 96)
+                icomTrx = icom.icom(RIG_SERIAL_PORT, '19200', int(CVIADDR,16))
             elif configur['icom']['radio'] == '910':
-                icomTrx = icom.icom(RIG_SERIAL_PORT, '19200', 96)
+                icomTrx = icom.icom(RIG_SERIAL_PORT, '19200', int(CVIADDR,16))
             
             # Update connection status
             RIG_CONNECTED = icomTrx.is_connected()
