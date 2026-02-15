@@ -244,11 +244,11 @@ INTERACTIVE = False # read user vfo/dial input - disable for inband packet
 RX_TPX_ONLY = False
 RIG_CONNECTED = False
 DOPPLER_UPDATE_LOCK = False
-
+print((int(CVIADDR,16)))
 if configur['icom']['radio'] == '9700':
-    icomTrx = icom.icom(RIG_SERIAL_PORT, '19200', 96)
+    icomTrx = icom.icom(RIG_SERIAL_PORT, '19200', int(CVIADDR,16))
 elif configur['icom']['radio'] == '910':
-    icomTrx = icom.icom(RIG_SERIAL_PORT, '19200', 96)
+    icomTrx = icom.icom(RIG_SERIAL_PORT, '19200', int(CVIADDR,16))
 RIG_CONNECTED = icomTrx.is_connected()    
 
 class Satellite:
@@ -483,12 +483,6 @@ class MainWindow(QMainWindow):
         self.combo3.addItems(subtone_list)
         self.combo3.currentTextChanged.connect(self.tone_changed) 
         combo_layout.addWidget(self.combo3)
-        
-        doppler_thres_layout = QHBoxLayout()
-        self.dopplerthreslabel = QLabel("Doppler threshold:")
-        doppler_thres_layout.addWidget(self.dopplerthreslabel)
-        self.dopplerthresval = QLabel("0.0")
-        doppler_thres_layout.addWidget(self.dopplerthresval)
         
         # 1x Label: RX Offset
         self.rxoffsetboxtitle = QLabel("RX Offset:")
@@ -870,7 +864,7 @@ class MainWindow(QMainWindow):
             self.radiotypecomb.setCurrentText('US/TSQL')
         
         # CI-V selector
-        self.radicvi_lbl = QLabel("CVI address (hex):")
+        self.radicvi_lbl = QLabel("CI-V address (hex):")
         radio_settings_layout.addWidget(self.radicvi_lbl, 2, 0)
         self.radicvi = QLineEdit()
         self.radicvi.setMaxLength(2)
