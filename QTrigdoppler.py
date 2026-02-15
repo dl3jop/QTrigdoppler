@@ -244,7 +244,7 @@ INTERACTIVE = False # read user vfo/dial input - disable for inband packet
 RX_TPX_ONLY = False
 RIG_CONNECTED = False
 DOPPLER_UPDATE_LOCK = False
-print((int(CVIADDR,16)))
+
 if configur['icom']['radio'] == '9700':
     icomTrx = icom.icom(RIG_SERIAL_PORT, '19200', int(CVIADDR,16))
 elif configur['icom']['radio'] == '910':
@@ -1402,6 +1402,8 @@ class MainWindow(QMainWindow):
         self.sat_changed( self.combo1.currentText())
         # Update stylesheet if applicable
         self.change_theme(STYLESHEET)
+        # Disable Tone on radio
+        self.tone_changed("None")
         
         if TLE_UPDATE_STARTUP:
             self.update_tle_file()
@@ -2225,6 +2227,7 @@ class MainWindow(QMainWindow):
 
     def the_exit_button_was_clicked(self):
         self.the_stop_button_was_clicked()
+        self.closeEvent()
         icomTrx.close()
         sys.exit()
     
@@ -2409,8 +2412,6 @@ class MainWindow(QMainWindow):
                 tracking_init = 1
 
                 while TRACKING_ACTIVE == True:
-                    a = datetime.now()
-                    #date_val = strftime('%Y/%m/%d %H:%M:%S', gmtime())
                     date_val = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M:%S.%f')[:-3]
                     myloc.date = ephem.Date(date_val)
 
@@ -2556,9 +2557,6 @@ class MainWindow(QMainWindow):
                         
                     self.my_satellite.new_cal = 0
                     time.sleep(0.01)
-                    #b = datetime.now()
-                    #c = b - a
-                    #print("Ups:" +str(1000000/c.microseconds))  
                     
 
         except Exception as e:
@@ -2851,7 +2849,7 @@ class MainWindow(QMainWindow):
             self.rotator_thread.join(timeout=2)
             self.rotator_thread = None
             logging.debug("Rotator thread stopped.")
-    def closeEvent(self, event):
+    def closeEvent(self):
         # Log shutdown
         logging.info("=" * 50)
         logging.info("QTrigdoppler shutting down")
@@ -2922,8 +2920,6 @@ class MainWindow(QMainWindow):
                 logging.debug("Remote client disconnected")
             except Exception as e:
                 logging.error(f"Error disconnecting remote client: {e}")
-        
-        event.accept()
 
     def update_rotator_position(self):
         if self.rotator:
